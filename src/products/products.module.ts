@@ -7,6 +7,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { LogRepositoty } from 'src/database/repositories/log.repository';
 import { StockRepositoty } from 'src/database/repositories/stock.repository';
+import { getModelToken, MongooseModule } from '@nestjs/mongoose';
+import { Fiscal, FiscalSchema } from 'src/database/schemas/fiscal.schema';
 
 @Module({
   imports: [
@@ -16,6 +18,7 @@ import { StockRepositoty } from 'src/database/repositories/stock.repository';
       StockRepositoty,
       ProductStockRelationRepository,
     ]),
+    MongooseModule.forFeature([{ name: Fiscal.name, schema: FiscalSchema }]),
     AuthModule,
   ],
   controllers: [ProductsController],

@@ -1,5 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isUUID } from 'class-validator';
+import { Model } from 'mongoose';
 import { Log } from 'src/database/entities/log.entity';
 import { MarketLog } from 'src/database/entities/marketLog.entity';
 import { ProductStockRelation } from 'src/database/entities/product_stock.entity';
@@ -8,8 +11,11 @@ import { LogRepositoty } from 'src/database/repositories/log.repository';
 import { ProductRepository } from 'src/database/repositories/product.repository';
 import { ProductStockRelationRepository } from 'src/database/repositories/product_repository.repository';
 import { StockRepositoty } from 'src/database/repositories/stock.repository';
+import { Fiscal, FiscalDocument } from 'src/database/schemas/fiscal.schema';
 import { LogType } from 'src/helpers/log.type.enum';
 import { CreateProductDto } from './dto/create-product.dto';
+
+import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class ProductsService {
@@ -22,6 +28,7 @@ export class ProductsService {
     private productStockRelationRepository: ProductStockRelationRepository,
     @InjectRepository(StockRepositoty)
     private stockRepository: StockRepositoty,
+    @InjectModel(Fiscal.name) private fiscalSchema: Model<FiscalDocument>,
   ) {}
 
   remove(uuid: number) {
@@ -77,10 +84,19 @@ export class ProductsService {
     delta: number,
     reason: LogType,
     unityPrice: number,
+    aditionalData: { [key: string]: any },
   ) {
     const relation = await this.productStockRelationRepository.findOne({
       where: { product: productUuid, stock: stockUuid },
     });
+
+    const schema = new this.fiscalSchema({
+      name: uuid(),
+      data: aditionalData,
+    });
+
+    schema.save();
+
     relation.quantity = relation.quantity + Number(delta);
     relation.validated = false;
     relation.inStockValue = unityPrice;
@@ -88,6 +104,8 @@ export class ProductsService {
       `product: ${productUuid} | stock: ${stockUuid} | delta: ${delta}`,
       reason,
     );
+
+    log.fiscal = schema.id;
 
     if ([LogType.ACQUISITION, LogType.SOLD].includes(reason)) {
       const marketLog = new MarketLog(
@@ -126,6 +144,19 @@ export class ProductsService {
 
     origin.validated = false;
     origin.save();
+
+    const schema = new this.fiscalSchema({
+      name: uuid(),
+      data: {
+        productUuid,
+        originStockUuid,
+        targetStockUuid,
+        delta,
+        targetInStockValue,
+      },
+    });
+
+    schema.save();
 
     let target = await this.productStockRelationRepository.findOne({
       where: {
@@ -185,5 +216,27 @@ export class ProductsService {
     );
     log.save();
     return await relation.save();
+  }
+
+  async getFiscal(id: string) {
+    const data: { [key: string]: any } = {};
+
+    data.schema = await this.fiscalSchema.findById(id);
+
+    data.log = await this.logRepositoty.findOne({
+      where: { fiscal: data.schema.id },
+    });
+    if (data.schema.data.stockUuid) {
+      data.stock = await this.stockRepository.findOne({
+        where: { uuid: data.schema.data.stockUuid },
+      });
+    }
+    if (data.schema.data.productUuid) {
+      data.product = await this.productRepository.findOne({
+        where: { uuid: data.schema.data.productUuid },
+      });
+    }
+    console.log(data);
+    return data;
   }
 }

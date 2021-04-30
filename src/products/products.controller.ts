@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Render,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -65,6 +66,7 @@ export class ProductsController {
     @Body('delta') delta: number,
     @Body('reason') reason: LogType,
     @Body('unity_price') unityPrice: number,
+    @Body('aditional_data') aditionalData: { [key: string]: any },
     @ValidateAsADM() adm: User,
   ) {
     this.productsService.changeQuantityFromStorage(
@@ -73,6 +75,7 @@ export class ProductsController {
       delta,
       reason,
       unityPrice,
+      aditionalData,
     );
   }
 
@@ -124,5 +127,20 @@ export class ProductsController {
   @UseGuards(AuthGuard())
   remove(@Param('id') id: string, @ValidateAsADM() user: User) {
     return this.productsService.remove(+id);
+  }
+
+  @Get('fiscal/:id')
+  @Render('fiscal')
+  async root(@Param('id') id: string) {
+    const data = await this.productsService.getFiscal(id);
+    console.log(data);
+    return {
+      schema: data.schema,
+      time: new Date(Date.now()).toLocaleString('pt-BR'),
+      log: data.log,
+      product: data.product,
+      stock: data.stock,
+      total: +data.schema.data.delta * +data.schema.data.unityPrice,
+    };
   }
 }

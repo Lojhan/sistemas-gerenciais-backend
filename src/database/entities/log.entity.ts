@@ -19,5 +19,8 @@ export class Log extends BaseEntity {
   log: string;
 
   @Column()
+  fiscal: string;
+
+  @Column()
   type: LogType;
 }
