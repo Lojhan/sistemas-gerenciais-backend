@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { LogType } from 'src/helpers/log.type.enum';
+import { LogType } from '../helpers/log.type.enum';
 import { LogsService } from './logs.service';
 
 @Controller('logs')

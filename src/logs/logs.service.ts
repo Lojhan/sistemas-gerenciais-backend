@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LogRepositoty } from 'src/database/repositories/log.repository';
-import { LogType } from 'src/helpers/log.type.enum';
+import { LogRepositoty } from '../database/repositories/log.repository';
+import { LogType } from '../helpers/log.type.enum';
 
 @Injectable()
 export class LogsService {

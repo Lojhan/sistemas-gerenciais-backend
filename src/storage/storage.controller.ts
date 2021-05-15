@@ -12,9 +12,9 @@ import { StorageService } from './storage.service';
 import { CreateStorageDto } from './dto/create-storage.dto';
 import { UpdateStorageDto } from './dto/update-storage.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ValidateAsADM } from 'src/auth/get-user.decorator';
-import { Stock } from 'src/database/entities/stock.entity';
-import { User } from 'src/database/entities/user.entity';
+import { ValidateAsADM } from '../auth/get-user.decorator';
+import { Stock } from '../database/entities/stock.entity';
+import { User } from '../database/entities/user.entity';
 
 @Controller('storage')
 export class StorageController {

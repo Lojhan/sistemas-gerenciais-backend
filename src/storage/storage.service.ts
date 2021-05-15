@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Log } from 'src/database/entities/log.entity';
-import { User } from 'src/database/entities/user.entity';
-import { LogRepositoty } from 'src/database/repositories/log.repository';
-import { ProductStockRelationRepository } from 'src/database/repositories/product_repository.repository';
-import { StockRepositoty } from 'src/database/repositories/stock.repository';
-import { LogType } from 'src/helpers/log.type.enum';
+import { Log } from '../database/entities/log.entity';
+import { User } from '../database/entities/user.entity';
+import { LogRepositoty } from '../database/repositories/log.repository';
+import { ProductStockRelationRepository } from '../database/repositories/product_repository.repository';
+import { StockRepositoty } from '../database/repositories/stock.repository';
+import { LogType } from '../helpers/log.type.enum';
 import { CreateStorageDto } from './dto/create-storage.dto';
 import { UpdateStorageDto } from './dto/update-storage.dto';
 

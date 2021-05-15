@@ -12,10 +12,10 @@ import {
 import { ProductsService } from './products.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ValidateAsADM } from '../auth/get-user.decorator';
-import { User } from 'src/database/entities/user.entity';
-import { LogType } from 'src/helpers/log.type.enum';
+import { User } from '../database/entities/user.entity';
+import { LogType } from '../helpers/log.type.enum';
 import { CreateProductDto } from './dto/create-product.dto';
-import { Product } from 'src/database/entities/product.entity';
+import { Product } from '../database/entities/product.entity';
 
 @Controller('products')
 export class ProductsController {

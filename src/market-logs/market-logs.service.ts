@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MarketLogRepository } from 'src/database/repositories/marketlog.repository';
+import { MarketLogRepository } from '../database/repositories/marketlog.repository';
 
 @Injectable()
 export class MarketLogsService {

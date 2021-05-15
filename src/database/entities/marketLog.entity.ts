@@ -1,4 +1,4 @@
-import { LogType } from 'src/helpers/log.type.enum';
+import { LogType } from '../../helpers/log.type.enum';
 import { BaseEntity, Column, Entity, PrimaryColumn, Unique } from 'typeorm';
 import { v4 as uuid } from 'uuid';
 
