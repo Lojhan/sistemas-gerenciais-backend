@@ -47,9 +47,13 @@ export class ProductsController {
   }
 
   @Get('')
-  @UseGuards(AuthGuard())
   getAll() {
     return this.productsService.getAllfromRelations();
+  }
+
+  @Get('/:id')
+  async getProduct(@Param('id') id: string) {
+    return await this.productsService.getOne(id);
   }
 
   @Get('/raw')

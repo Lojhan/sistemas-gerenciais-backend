@@ -8,6 +8,11 @@ import { StorageModule } from './storage/storage.module';
 import { LogsModule } from './logs/logs.module';
 import { MarketLogsModule } from './market-logs/market-logs.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { MessagesModule } from './messages/messages.module';
+import { MailModule } from './mail/mail.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -26,6 +31,33 @@ import { MongooseModule } from '@nestjs/mongoose';
     StorageModule,
     LogsModule,
     MarketLogsModule,
+    MessagesModule,
+    MailModule,
+    MailerModule.forRoot({
+      transport: {
+        tls: {
+          ciphers: 'SSLv3',
+        },
+        host: 'smtp-mail.outlook.com',
+        port: 587,
+        auth: {
+          user: 'Hvitgrimr@outlook.com',
+          pass: 'DittoCUjo69',
+        },
+      },
+      defaults: {
+        from: '"Hvitgrimr" <Hvitgrimr@outlook.com>',
+      },
+
+      preview: true,
+      // template: {
+      //   dir: join(__dirname, '..', 'templates'),
+      //   adapter: new HandlebarsAdapter(),
+      //   options: {
+      //     strict: true,
+      //   },
+      // },
+    }),
   ],
 })
 export class AppModule {}

@@ -1,10 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
-import { isUUID } from 'class-validator';
 import { Model } from 'mongoose';
 import { Log } from '../database/entities/log.entity';
-import { MarketLog } from '../database/entities/marketLog.entity';
 import { ProductStockRelation } from '../database/entities/product_stock.entity';
 import { User } from '../database/entities/user.entity';
 import { LogRepositoty } from '../database/repositories/log.repository';
@@ -14,8 +12,6 @@ import { StockRepositoty } from '../database/repositories/stock.repository';
 import { Fiscal, FiscalDocument } from '../database/schemas/fiscal.schema';
 import { LogType } from '../helpers/log.type.enum';
 import { CreateProductDto } from './dto/create-product.dto';
-
-import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class ProductsService {
@@ -33,6 +29,12 @@ export class ProductsService {
 
   remove(uuid: number) {
     return this.productRepository.delete(uuid);
+  }
+
+  async getOne(uuid: string) {
+    return await this.productStockRelationRepository.findOne({
+      where: { uuid },
+    });
   }
 
   create(product: CreateProductDto, user: User) {
@@ -58,10 +60,9 @@ export class ProductsService {
     const products = await this.productStockRelationRepository.find({
       where: { product: uuid },
     });
-    products.forEach((product) => {
-      console.log(product.inStockValue);
-      totalValue = +totalValue + +product.inStockValue;
-    });
+    products.forEach(
+      (product) => (totalValue = +totalValue + +product.inStockValue),
+    );
     return totalValue / products.length;
   }
 
@@ -86,45 +87,14 @@ export class ProductsService {
     unityPrice: number,
     aditionalData: { [key: string]: any },
   ) {
-    const relation = await this.productStockRelationRepository.findOne({
-      where: { product: productUuid, stock: stockUuid },
-    });
-
-    const schema = new this.fiscalSchema({
-      name: uuid(),
-      data: aditionalData,
-    });
-
-    schema.save();
-
-    relation.quantity = relation.quantity + Number(delta);
-    relation.validated = false;
-    relation.inStockValue = unityPrice;
-    const log = new Log(
-      `product: ${productUuid} | stock: ${stockUuid} | delta: ${delta}`,
+    return await this.productStockRelationRepository.changeQuantityFromStorage(
+      productUuid,
+      stockUuid,
+      delta,
       reason,
+      unityPrice,
+      aditionalData,
     );
-
-    log.fiscal = schema.id;
-
-    if ([LogType.ACQUISITION, LogType.SOLD].includes(reason)) {
-      const marketLog = new MarketLog(
-        `produto ${reason === LogType.ACQUISITION ? 'comprado' : 'vendido'}`,
-        reason as LogType.ACQUISITION | LogType.SOLD,
-        unityPrice ||
-          (
-            await this.productStockRelationRepository.findOne({
-              where: { product: productUuid, stock: stockUuid },
-            })
-          ).inStockValue,
-        Math.abs(delta),
-        productUuid,
-      );
-      marketLog.save();
-    }
-
-    log.save();
-    return await relation.save();
   }
 
   async transferStorage(
@@ -134,56 +104,13 @@ export class ProductsService {
     delta: number,
     targetInStockValue: number,
   ) {
-    const origin = await this.productStockRelationRepository.findOne({
-      where: { product: productUuid, stock: originStockUuid },
-    });
-
-    origin.quantity = origin.quantity - Number(delta);
-    if (origin.quantity < 0)
-      throw new InternalServerErrorException('Quantidade não permitida');
-
-    origin.validated = false;
-    origin.save();
-
-    const schema = new this.fiscalSchema({
-      name: uuid(),
-      data: {
-        productUuid,
-        originStockUuid,
-        targetStockUuid,
-        delta,
-        targetInStockValue,
-      },
-    });
-
-    schema.save();
-
-    let target = await this.productStockRelationRepository.findOne({
-      where: {
-        stock: await this.stockRepository.findOne(targetStockUuid),
-        product: await this.productRepository.findOne(productUuid),
-      },
-    });
-
-    if (target === undefined) {
-      target = this.productStockRelationRepository.create({
-        stock: await this.stockRepository.findOne(targetStockUuid),
-        product: await this.productRepository.findOne(productUuid),
-      });
-    }
-
-    target.quantity = +target.quantity + Number(delta);
-    target.validated = false;
-    target.inStockValue = targetInStockValue || target.product.listPrice;
-    target.save();
-
-    const log = new Log(
-      `product ${productUuid} moved from ${originStockUuid} to ${targetStockUuid}`,
-      LogType.TRANSFER,
+    return await this.productStockRelationRepository.transferStorage(
+      productUuid,
+      originStockUuid,
+      targetStockUuid,
+      delta,
+      targetInStockValue,
     );
-    log.save();
-
-    return { origin, target, log };
   }
 
   async updateStorageData(

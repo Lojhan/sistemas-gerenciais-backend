@@ -12,6 +12,6 @@ export class AuthCredentialsDto {
   @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/)
   password: string;
 
-  @Matches(/^(adm|user)$/)
+  @Matches(/^(adm|user|client)$/)
   type: string;
 }

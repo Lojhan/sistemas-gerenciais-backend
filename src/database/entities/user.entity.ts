@@ -2,10 +2,12 @@ import {
   BaseEntity,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
+import { Sale } from './sale.entity';
 
 @Entity()
 @Unique(['username', 'id'])
@@ -33,6 +35,9 @@ export class User extends BaseEntity {
 
   @Column()
   type: string;
+
+  @OneToMany((_type) => Sale, (sale) => sale)
+  stocks: Sale[];
 
   async validatePassword(password: string): Promise<boolean> {
     const hash = await bcrypt.hash(password, this.salt);
