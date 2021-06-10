@@ -33,22 +33,18 @@ export class MessagesService {
   }
 
   handleSaleMessage(msg: amqp.Message) {
-    console.log(JSON.parse(msg.content.toString()));
     this.channel.ack(msg);
+    const purchase = msg.content.toJSON();
+    console.log(purchase);
 
-    events.prototype.emit('interest', {
-      user: 'this.user',
-      product: 'this.product',
-    });
+    events.prototype.emit('purchase', purchase);
   }
 
   handlePurchaseMessage(msg: amqp.Message) {
-    console.log(JSON.parse(msg.content.toString()));
     this.channel.ack(msg);
+    const purchase = JSON.parse(msg.content.toString());
+    console.log(purchase);
 
-    events.prototype.emit('interest', {
-      user: 'this.user',
-      product: 'this.product',
-    });
+    events.prototype.emit('purchase', purchase);
   }
 }
