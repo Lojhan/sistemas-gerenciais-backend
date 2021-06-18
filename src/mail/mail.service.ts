@@ -6,22 +6,16 @@ import { Interest } from 'src/database/entities/interest.entity';
 @Injectable()
 export class MailService {
   constructor(private readonly mailerService: MailerService) {
-    events.prototype.on('interest', (data) => this.sendInterestingMail(data));
+    events.prototype.on('sale', (data) => this.sendSaleMail(data));
     events.prototype.on('purchase', (data) => this.sendPurchaseMail(data));
   }
 
-  public sendInterestingMail(interest: Interest): void {
-    console.log(interest);
-
+  public sendSaleMail(payload: any): void {
     this.mailerService
       .sendMail({
-        to: interest.user.username,
-        subject: `Vamos te forçar a comprar esse ${interest.product.name} ✔`,
-        // template: 'aprovacao',
-        // context: {
-        //   username: data[0].username,
-        // },
-        text: 'Compra essa merda obg',
+        to: payload.client.username,
+        subject: `Quase seu!`,
+        text: `Assim que confirmarmos o pagamento, o seu pedido será enviado até você ✔`,
       })
       .then((e) => {
         console.log(e);
@@ -32,17 +26,11 @@ export class MailService {
   }
 
   public sendPurchaseMail(payload: any): void {
-    console.log(payload.client);
-
     this.mailerService
       .sendMail({
         to: payload.client.username,
-        subject: `Você acabou de comprar  ${payload.relation[0].psRelation.product.name} ✔`,
-        // template: 'aprovacao',
-        // context: {
-        //   username: data[0].username,
-        // },
-        text: 'Brigado pela compra',
+        subject: `Pagamento confirmado!`,
+        text: `O pagamento do produto foi confirmado e ele já está indo até você ✔`,
       })
       .then((e) => {
         console.log(e);

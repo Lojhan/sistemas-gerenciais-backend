@@ -35,18 +35,15 @@ import { join } from 'path';
     MailModule,
     MailerModule.forRoot({
       transport: {
-        tls: {
-          ciphers: 'SSLv3',
-        },
-        host: 'smtp-mail.outlook.com',
+        host: 'smtp.gmail.com',
         port: 587,
         auth: {
-          user: 'Hvitgrimr@outlook.com',
-          pass: 'DittoCUjo69',
+          user: 'emailsistemasgerenciais@gmail.com',
+          pass: '12342134',
         },
       },
       defaults: {
-        from: '"Hvitgrimr" <Hvitgrimr@outlook.com>',
+        from: '"Sistemas Gerenciais" <emailsistemasgerenciais@gmail.com>',
       },
 
       preview: true,

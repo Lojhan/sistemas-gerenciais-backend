@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as events from 'events';
 import { Model } from 'mongoose';
+import { PSSRelation } from 'src/database/entities/prod_stock_sale.entity';
+import { Sale } from 'src/database/entities/sale.entity';
+import { PSSRepositoty } from 'src/database/repositories/pss.repository';
 import { Log } from '../database/entities/log.entity';
 import { ProductStockRelation } from '../database/entities/product_stock.entity';
 import { User } from '../database/entities/user.entity';
@@ -22,10 +26,43 @@ export class ProductsService {
     private logRepositoty: LogRepositoty,
     @InjectRepository(ProductStockRelationRepository)
     private productStockRelationRepository: ProductStockRelationRepository,
+    @InjectRepository(PSSRepositoty)
+    private pssRepositoty: PSSRepositoty,
     @InjectRepository(StockRepositoty)
     private stockRepository: StockRepositoty,
     @InjectModel(Fiscal.name) private fiscalSchema: Model<FiscalDocument>,
-  ) {}
+  ) {
+    events.prototype.on('purchase', (data) => {
+      this.handlePurchase(data);
+      //
+    });
+  }
+
+  async handlePurchase(data: Sale) {
+    data.relation = await this.pssRepositoty.find({
+      where: { sale: { uuid: data.uuid } },
+    });
+
+    console.log(data.relation);
+
+    let total = 0;
+    data?.relation?.forEach((e) => {
+      total += e.quantity + e.quantity;
+    });
+
+    console.log(total);
+
+    data.relation.forEach((relation) => {
+      this.changeQuantityFromStorage(
+        relation.psRelation.product.uuid,
+        relation.psRelation.stock.uuid,
+        -total,
+        LogType.SOLD,
+        relation.priceAtTime,
+        {},
+      );
+    });
+  }
 
   remove(uuid: number) {
     return this.productRepository.delete(uuid);

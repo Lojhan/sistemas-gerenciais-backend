@@ -9,6 +9,7 @@ import { LogRepositoty } from '../database/repositories/log.repository';
 import { StockRepositoty } from '../database/repositories/stock.repository';
 import { getModelToken, MongooseModule } from '@nestjs/mongoose';
 import { Fiscal, FiscalSchema } from '../database/schemas/fiscal.schema';
+import { PSSRepositoty } from 'src/database/repositories/pss.repository';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { Fiscal, FiscalSchema } from '../database/schemas/fiscal.schema';
       LogRepositoty,
       StockRepositoty,
       ProductStockRelationRepository,
+      PSSRepositoty,
     ]),
     MongooseModule.forFeature([{ name: Fiscal.name, schema: FiscalSchema }]),
     AuthModule,

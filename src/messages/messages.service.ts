@@ -34,16 +34,14 @@ export class MessagesService {
 
   handleSaleMessage(msg: amqp.Message) {
     this.channel.ack(msg);
-    const purchase = msg.content.toJSON();
-    console.log(purchase);
+    const sale = JSON.parse(msg.content.toString());
 
-    events.prototype.emit('purchase', purchase);
+    events.prototype.emit('sale', sale);
   }
 
   handlePurchaseMessage(msg: amqp.Message) {
     this.channel.ack(msg);
     const purchase = JSON.parse(msg.content.toString());
-    console.log(purchase);
 
     events.prototype.emit('purchase', purchase);
   }

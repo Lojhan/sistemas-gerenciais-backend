@@ -33,9 +33,12 @@ export class ProductStockRelationRepository extends Repository<ProductStockRelat
     unityPrice: number,
     aditionalData: { [key: string]: any },
   ) {
+    console.log(productUuid, stockUuid);
     const relation = await this.findOne({
       where: { product: productUuid, stock: stockUuid },
     });
+
+    console.log(relation);
 
     const schema = await this.mongoose
       .model(Fiscal.name, FiscalSchema)

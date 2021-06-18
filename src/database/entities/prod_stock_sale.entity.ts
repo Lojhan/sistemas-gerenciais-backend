@@ -3,12 +3,9 @@ import {
   Column,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
   Unique,
 } from 'typeorm';
-import { Product } from './product.entity';
-import { Stock } from './stock.entity';
 import { v4 as uuid } from 'uuid';
 import { Sale } from './sale.entity';
 import { ProductStockRelation } from './product_stock.entity';
@@ -40,8 +37,7 @@ export class PSSRelation extends BaseEntity {
   })
   psRelation: ProductStockRelation;
 
-  @ManyToOne((type) => Sale, (sale) => sale, {
-    eager: true,
+  @ManyToOne((type) => Sale, (sale) => sale.uuid, {
     primary: true,
   })
   sale: Sale;
